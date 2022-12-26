@@ -8,9 +8,10 @@ const path = require('path');
 // Use pug
 app.set('view engine', 'pug');
 
-app.get('/:path', (req, res) => {
+app.get('/q=:path', (req, res) => {
     
     // Get the path from the url
+    const splited = req.params.path.split('|')
     const requestedPath = path.join(...req.params.path.split('|'));
     
     // Check if file
@@ -36,7 +37,7 @@ app.get('/:path', (req, res) => {
     }
     );
     console.log(requestedPath)
-    return res.render("files_folders",{files:files_with_type,base:requestedPath.replace(path.sep, "|")});
+    return res.render("files_folders",{files:files_with_type,base:requestedPath.replace(path.sep, "|").replace('/',"")});
 
 });
 app.get('/', (req, res) => {
