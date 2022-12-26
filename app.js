@@ -11,16 +11,7 @@ app.set('view engine', 'pug');
 app.get('/:path', (req, res) => {
     
     // Get the path from the url
-    // console.log(req.params.path)
-    // console.log(req.params.path.split('|'))
-    // If the path contains < at the end, then back to the previous directory
-    // const requestedPath = req.params.path.endsWith('<') ? req.params.path.slice(0, -1) : req.params.path;
     const requestedPath = path.join(...req.params.path.split('|'));
-    // console.log(requestedPath)
-
-    if (requestedPath.endsWith('<')) {
-        return
-    }
     
     // Check if file
     if (fs
@@ -44,7 +35,8 @@ app.get('/:path', (req, res) => {
         }
     }
     );
-    return res.render("files_folders",{files:files_with_type,base:requestedPath.replace(/\\/g, "|")});
+    console.log(requestedPath)
+    return res.render("files_folders",{files:files_with_type,base:requestedPath.replace(path.sep, "|")});
 
 });
 app.get('/', (req, res) => {
