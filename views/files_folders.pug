@@ -7,8 +7,8 @@ html(lang="en")
         title Explorer
     body 
         div 
-            a(href=`/${base}|..`) back
+            a(href=`/go/back`) back
         each file in files    
             div
-                a(href=`/${base}|${file.name}`) #{file.name}
+                a(href=`/${file.name}`) #{file.name}
                 span  `    #{file.type}`
