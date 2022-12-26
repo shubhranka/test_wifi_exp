@@ -32,23 +32,32 @@ app.get('/go/base', (req, res) => {
 });
 app.get('/go/back', (req, res) => {
 
-    // Back to the parent directory
-    curPath = path.resolve(curPath, '..');
+    try{
 
-    // Read the current directory
-    const files = fs.readdirSync(curPath);
-    const files_with_type = files.map(file => {
-        const file_type = fs.lstatSync(path.join(curPath, file)).isDirectory() ? "folder" : "file";
-        return {
-            name: file,
-            type: file_type
+        // Back to the parent directory
+        const newpath = path.resolve(curPath, '..');
+        
+        // Read the current directory
+        const files = fs.readdirSync(newpath);
+        const files_with_type = files.map(file => {
+            const file_type = fs.lstatSync(path.join(newpath, file)).isDirectory() ? "folder" : "file";
+            return {
+                name: file,
+                type: file_type
+            }
         }
-    }
-    );
+        );
+        
+        // Update the currpath
+        curPath = newpath
 
-    // Render the pug file
-    return res.render("files_folders",{files: files_with_type});
-});
+        // Render the pug file
+        return res.render("files_folders",{files: files_with_type});
+    }catch(err){
+        next(err)
+    }
+        
+    });
 
 
 app.get('/:name', (req, res) => {
@@ -86,10 +95,7 @@ app.get('/:name', (req, res) => {
 });
 
 
-app.get('/', (req, res) => {
-    
-    // Get the path from the url
-    // const requestedPad = req.params.path;
+app.get('/', (req, res,next) => {
 
     // Get names of files in the directory
     const files = fs.readdirSync(curPath);
@@ -100,10 +106,29 @@ app.get('/', (req, res) => {
             type: file_type
         }
     });
-    // Check file type file or folder
+
+    // Render
     res.render("files_folders",{files:files_with_type});
-    // res.download(path.join(__dirname, 'test.txt'));
+
 });
+
+app.use((error,req,res,next)=>{
+
+
+    // Read the current directory
+    const files = fs.readdirSync(curPath);
+    const files_with_type = files.map(file => {
+        const file_type = fs.lstatSync(path.join(curPath, file)).isDirectory() ? "folder" : "file";
+        return {
+            name: file,
+            type: file_type
+        }
+    }
+    );
+
+    // Render the pug file
+    return res.render("files_folders",{files: files_with_type});
+})
 
 app.listen(3000, () => {
     console.log('Listening on port 3000');
