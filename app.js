@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const fs = require('fs');
 const bodyParser = require('body-parser');
-
+var Archiver = require('archiver');
 let curPath = __dirname;
 
 // use body parser
@@ -153,6 +153,24 @@ app.use((error,req,res,next)=>{
 
 const port = process.argv[2] || 3000;
 
+app.get("/download",(req,res)=>{    
+    
+    // Create zip
+    const zip = Archiver('zip');
+
+    // Attach zip to response
+    zip.pipe(res);
+
+    // Add files to zip
+    zip.directory(curPath, false);
+
+    // Finalize zip
+    zip.finalize();
+
+    // Send zip
+    res.attachment('folder.zip');
+
+})
 app.listen(port, () => {
     const ipaddress = require('ip').address();
     console.log(`Server started at http://${ipaddress}:${port}`);

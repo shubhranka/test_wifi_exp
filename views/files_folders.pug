@@ -10,6 +10,9 @@ html(lang="en")
     body 
         div(class="back_button")
             a(href=`/go/back` ) back
+
+        div(class="back_button")
+            a(href=`/download` ) Download full directory
         form(action="/search" method="POST") 
             input(type="text" id="search" placeholder="Search..." name="search_path" value=`${path}`)
             button(type="submit") Search
