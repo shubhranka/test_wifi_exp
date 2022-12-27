@@ -34,8 +34,7 @@ app.get('/go/back', (req, res) => {
         const newpath = path.resolve(curPath, '..');
         
         // Check if allowed directory
-        fs.lstatSync(newpath)
-
+        fs.accessSync(newpath, fs.constants.R_OK)
         
         // Update the currpath
         curPath = newpath
@@ -93,7 +92,7 @@ app.post('/search',(req,res)=>{
         }
 
         // Check if file or allowed directory
-        const fsstat = fs.lstatSync(newpath);
+        fs.accessSync(newpath, fs.constants.R_OK)
         
         // // If file, then download
         if (fsstat.isFile()){
