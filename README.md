@@ -39,3 +39,6 @@
     Server started at http://<ip_address>:<port>
     
     <!-- Copy this link to open the download explorer -->
+```
+
+# App coming soon
