@@ -54,8 +54,6 @@ app.post('/', (req, res) => {
     
     try{
 
-
-        console.log(req.body)
         // Get the name of the file
         const name = req.body.name;
         
@@ -72,7 +70,6 @@ app.post('/', (req, res) => {
         // Update the current path
         curPath = newpath;
 
-        console.log(curPath)
         return res.redirect('/');
     }catch(err){
         next(err)
@@ -80,10 +77,67 @@ app.post('/', (req, res) => {
     
 });
 
+app.post('/search',(req,res)=>{
+
+    try{
+
+        // Get the path to search
+        const search_path = req.body.search_path;
+        
+        // Generate the path
+        const newpath = path.join(search_path);
+        
+        // Check if file path exists
+        if(!fs.existsSync(newpath)){
+            throw new Error("Path does not exist");
+        }
+
+        // Check if file or allowed directory
+        const fsstat = fs.lstatSync(newpath);
+        
+        // // If file, then download
+        if (fsstat.isFile()){
+            return res.download(newpath);
+        }
+
+        // If directory, then update the current path
+        curPath = newpath;
+        
+        // Redirect to the base directory
+        return res.redirect('/');
+        
+    }catch(err){
+        next(err)
+    }
+})
+    
 
 app.get('/', (req, res,next) => {
 
-    // Get names of files in the directory
+    try{
+
+        // Get names of files in the directory
+        const files = fs.readdirSync(curPath);
+        const files_with_type = files.map(file => {
+            const file_type = fs.lstatSync(path.join(curPath)).isDirectory() ? "folder" : "file";
+            return {
+                name: file,
+                type: file_type
+            }
+        });
+    
+        // Render
+        return res.render("files_folders",{files:files_with_type,path:curPath});
+    }
+    catch(err){
+        return err;
+    }
+});
+
+app.use((error,req,res,next)=>{
+
+
+    // Redirect to the base directory
     const files = fs.readdirSync(curPath);
     const files_with_type = files.map(file => {
         const file_type = fs.lstatSync(path.join(curPath)).isDirectory() ? "folder" : "file";
@@ -96,26 +150,9 @@ app.get('/', (req, res,next) => {
     // Render
     return res.render("files_folders",{files:files_with_type,path:curPath});
 
-});
-
-app.use((error,req,res,next)=>{
-
-
-    // Redirect to the base directory
-    const files = fs.readdirSync(curPath);
-    const files_with_type = files.map(file => {
-        const file_type = fs.lstatSync(path.join(__dirname, file)).isDirectory() ? "folder" : "file";
-        return {
-            name: file,
-            type: file_type
-        }
-    });
-
-    // Render
-    return res.render("files_folders",{files:files_with_type,path:curPath});
-
 })
 
 app.listen(3000, () => {
-    console.log('Listening on port 3000');
+    const ipaddress = require('ip').address();
+    console.log(`Server started at http://${ipaddress}:3000`);
 });
