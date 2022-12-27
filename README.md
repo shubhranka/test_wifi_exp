@@ -3,7 +3,7 @@
 
 ### Install Termux
 ```bash
-  install termux from play store
+  install termux from f-droid
 ```
 
 ### Installing NodeJs in termux
