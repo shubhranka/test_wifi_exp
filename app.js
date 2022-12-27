@@ -1,9 +1,12 @@
 const express = require('express');
 const app = express();
 const fs = require('fs');
+const bodyParser = require('body-parser');
 
 let curPath = __dirname;
 
+// use body parser
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Use public static files
 app.use(express.static('public'));
@@ -20,19 +23,8 @@ app.get('/go/base', (req, res) => {
     // Back to the base directory
     curPath = __dirname
 
-    // Read the current directory
-    const files = fs.readdirSync(curPath);
-    const files_with_type = files.map(file => {
-        const file_type = fs.lstatSync(path.join(curPath, file)).isDirectory() ? "folder" : "file";
-        return {
-            name: file,
-            type: file_type
-        }
-    }
-    );
-
-    // Render the pug file
-    return res.render("files_folders",{files: files_with_type});
+    // Redirect to the base directory
+    return res.redirect('/');
 });
 app.get('/go/back', (req, res) => {
 
@@ -41,22 +33,16 @@ app.get('/go/back', (req, res) => {
         // Back to the parent directory
         const newpath = path.resolve(curPath, '..');
         
-        // Read the current directory
-        const files = fs.readdirSync(newpath);
-        const files_with_type = files.map(file => {
-            const file_type = fs.lstatSync(path.join(newpath, file)).isDirectory() ? "folder" : "file";
-            return {
-                name: file,
-                type: file_type
-            }
-        }
-        );
+        // Check if allowed directory
+        fs.lstatSync(newpath)
+
         
         // Update the currpath
         curPath = newpath
 
-        // Render the pug file
-        return res.render("files_folders",{files: files_with_type});
+        // Redirect to the base directory
+        return res.redirect('/');
+        
     }catch(err){
         next(err)
     }
@@ -64,44 +50,58 @@ app.get('/go/back', (req, res) => {
     });
 
 
-app.get('/:name', (req, res) => {
+app.post('/', (req, res) => {
     
-    // Get the name of the file
-    const name = req.params.name;
+    try{
 
-    // Generate the path
-    const newpath = path.join(curPath, name);
-    
-    // Check if file
-    if (fs
-        .lstatSync(newpath)
-        .isFile()) {
-            return res.download(newpath);
+
+        console.log(req.body)
+        // Get the name of the file
+        const name = req.body.name;
+        
+        // Generate the path
+        const newpath = path.join(curPath, name);
+        
+        // Check if file
+        if (fs
+            .lstatSync(newpath)
+            .isFile()) {
+                return res.download(newpath);
         }
         
-    // Get names of files in the directory
-    const files = fs.readdirSync(newpath);
-    const files_with_type = files.map(file => {
-        const file_type = fs.lstatSync(path.join(newpath, file)).isDirectory() ? "folder" : "file";
-        return {
-            name: file,
-            type: file_type
-        }
+        // Update the current path
+        curPath = newpath;
+
+        console.log(curPath)
+        return res.redirect('/');
+    }catch(err){
+        next(err)
     }
-    );
     
-    // Update the current path
-    curPath = newpath;
-
-    // Render the files
-    return res.render("files_folders",{files: files_with_type});
-
 });
 
 
 app.get('/', (req, res,next) => {
 
     // Get names of files in the directory
+    const files = fs.readdirSync(curPath);
+    const files_with_type = files.map(file => {
+        const file_type = fs.lstatSync(path.join(curPath)).isDirectory() ? "folder" : "file";
+        return {
+            name: file,
+            type: file_type
+        }
+    });
+
+    // Render
+    return res.render("files_folders",{files:files_with_type,path:curPath});
+
+});
+
+app.use((error,req,res,next)=>{
+
+
+    // Redirect to the base directory
     const files = fs.readdirSync(curPath);
     const files_with_type = files.map(file => {
         const file_type = fs.lstatSync(path.join(__dirname, file)).isDirectory() ? "folder" : "file";
@@ -112,26 +112,8 @@ app.get('/', (req, res,next) => {
     });
 
     // Render
-    res.render("files_folders",{files:files_with_type});
+    return res.render("files_folders",{files:files_with_type,path:curPath});
 
-});
-
-app.use((error,req,res,next)=>{
-
-
-    // Read the current directory
-    const files = fs.readdirSync(curPath);
-    const files_with_type = files.map(file => {
-        const file_type = fs.lstatSync(path.join(curPath, file)).isDirectory() ? "folder" : "file";
-        return {
-            name: file,
-            type: file_type
-        }
-    }
-    );
-
-    // Render the pug file
-    return res.render("files_folders",{files: files_with_type});
 })
 
 app.listen(3000, () => {
