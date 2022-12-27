@@ -4,11 +4,13 @@ html(lang="en")
         meta(charset="UTF-8")
         meta(http-equiv="X-UA-Compatible", content="IE=edge")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        script(src="/js/script.js") 
         title Explorer
     body 
         div 
             a(href=`/go/back`) back
-        each file in files    
-            div
-                a(href=`/${file.name}`) #{file.name}
-                span  `    #{file.type}`
+        div(id = `next_container`)
+            each file in files    
+                div
+                    a(href=`/${file.name}` class="nexts"  id=`next_${file.name}`) #{file.name}
+                    span  `    #{file.type}`

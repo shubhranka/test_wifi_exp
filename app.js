@@ -4,6 +4,10 @@ const fs = require('fs');
 
 let curPath = __dirname;
 
+
+// Use public static files
+app.use(express.static('public'));
+
 // Current directory
 const path = require('path');
 
