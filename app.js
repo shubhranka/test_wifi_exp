@@ -151,7 +151,9 @@ app.use((error,req,res,next)=>{
 
 })
 
-app.listen(3000, () => {
+const port = process.argv[2] || 3000;
+
+app.listen(port, () => {
     const ipaddress = require('ip').address();
-    console.log(`Server started at http://${ipaddress}:3000`);
+    console.log(`Server started at http://${ipaddress}:${port}`);
 });
